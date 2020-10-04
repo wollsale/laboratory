@@ -11,41 +11,60 @@
             class="list__item"
             v-for="personName of names"
             v-bind:key="personName['.key']"
-            @click="setEditName(personName['.key'])"
           >
             <!-- ITEM NAME -->
-            <p v-if="!personName.edit">
+            <span class="initial" v-if="personName.name">{{
+              getFirstLetter(personName.name)
+            }}</span>
+            <p
+              v-if="!personName.edit"
+              tabindex="0"
+              @focus="setEditName(personName['.key'])"
+            >
               {{ personName.name }}
             </p>
 
             <!-- FORM -->
-            <div class="form" v-else>
+            <div class="form form--placeholder flex" v-else>
               <input
                 class="placeholder"
                 type="text"
                 v-model="personName.name"
+                v-focus
+                tabindex="0"
               />
-              <button @click="saveEditName(personName)">Save</button>
-              <button @click="cancelEditName(personName['.key'])">
-                Cancel
-              </button>
-              <button @click="removeName(personName)">Remove</button>
+              <div class="options">
+                <button class="button" @click="saveEditName(personName)">
+                  Save
+                </button>
+                <!-- <button @click="cancelEditName(personName['.key'])">Cancel</button> -->
+                <button class="button" @click="removeName(personName['.key'])">
+                  &#128465;
+                </button>
+              </div>
             </div>
           </li>
         </ul>
       </div>
 
       <!-- ADD NEW USER -->
-      <div class="action">
-        <button @click="form ? (form = false) : (form = true)" class="button">
-          <span v-if="!form">Add new</span>
-          <span v-else>Cancel</span>
+      <div class="action form" v-if="form">
+        <input
+          type="text"
+          placeholder="Name"
+          class="input_add"
+          v-model="name"
+          v-focus
+        />
+        <button @click="submitName()" class="button button--primary">
+          Add
         </button>
       </div>
-      <div class="action form" v-if="form">
-        <label for="name">Name:</label>
-        <input type="text" v-model="name" v-focus />
-        <button @click="submitName()" class="button">Add</button>
+      <div class="action">
+        <button @click="form ? (form = false) : (form = true)" class="button">
+          <span v-if="!form">&#43; Add new</span>
+          <span v-else>Cancel</span>
+        </button>
       </div>
     </div>
   </div>
@@ -70,6 +89,7 @@ export default {
     submitName() {
       namesRef.push({ name: this.name, edit: false });
       this.name = "";
+      this.form = false;
     },
     removeName(key) {
       namesRef.child(key).remove();
@@ -145,13 +165,12 @@ body {
 }
 
 .list__item {
-  margin-bottom: 3em;
+  margin-bottom: 2em;
   list-style: none;
   display: flex;
   align-items: baseline;
   position: relative;
   z-index: 0;
-  cursor: pointer;
 }
 
 .list__item::before {
@@ -174,6 +193,10 @@ body {
   opacity: 1;
 }
 
+.flex {
+  display: flex;
+}
+
 h1 {
   margin: 0;
   font-size: 2em;
@@ -181,27 +204,33 @@ h1 {
   letter-spacing: 0.03em;
 }
 
+p {
+  cursor: pointer;
+}
+
 span.initial {
-  display: inline-block;
-  height: 32px;
-  width: 32px;
+  min-height: 32px;
+  min-width: 32px;
   background: #f4f4f7;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 14px;
-  margin-right: 16px;
+  margin-right: 8px;
 }
 
 p,
-.placeholder {
+.placeholder,
+.input_add {
   margin: 0;
   font-size: 14px;
   line-height: 116%;
   letter-spacing: 0.05em;
   color: #5d5b6b;
-  padding: 8px;
+  padding: 16px 8px;
+  width: 100%;
+  border-radius: 4px;
 }
 
 .action {
@@ -220,15 +249,57 @@ p,
   border: 0;
   padding: 16px 0;
   border-radius: 4px;
+  cursor: pointer;
+}
+.button--primary {
+  background: #5c4dd0;
+  color: #f4f4f7;
+}
+.button:hover {
+  background-color: #ebebf0;
+}
+.button--primary:hover {
+  background-color: #5143bb;
 }
 
-input.placeholder {
+input.placeholder,
+.input_add {
   background: none;
   border: 0;
   outline: none;
-  padding: 8px;
 }
-input.placeholder:focus {
+input.placeholder:focus,
+.input_add:focus {
   background: #f4f4f7;
+}
+
+.form--placeholder {
+  width: 100%;
+}
+
+.options {
+  display: flex;
+}
+
+.options .button {
+  padding: 8px 16px;
+  margin-left: 8px;
+}
+
+.input_add {
+  border: 1px solid #f4f4f7;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  padding-left: 16px;
+}
+
+.v-enter {
+  transform: scale(1);
+  transition: all 0.4s ease-in-out;
+}
+
+.v-leave {
+  transform: scale(0);
+  transition: all 0.4s ease-in-out;
 }
 </style>
